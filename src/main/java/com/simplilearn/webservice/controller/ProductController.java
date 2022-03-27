@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.simplilearn.webservice.entity.Product;
+import com.simplilearn.webservice.exception.ProductAlreadyExist;
+import com.simplilearn.webservice.exception.ProductNotFound;
 
 @RestController
 public class ProductController {
@@ -28,7 +30,7 @@ public class ProductController {
 				return product;
 			}
 		}
-		return null;
+		throw new ProductNotFound("Product is not found with given id "+id);
 	}
 
 	// get one product by name
@@ -39,7 +41,7 @@ public class ProductController {
 				return product;
 			}
 		}
-		return null;
+		throw new ProductNotFound("Product is not found with given name "+name);
 	}
 
 	// get one product by name
@@ -50,7 +52,7 @@ public class ProductController {
 				return product;
 			}
 		}
-		return null;
+		throw new ProductNotFound("Product is not found with given name "+name);
 	}
 
 	// get all products
@@ -65,6 +67,11 @@ public class ProductController {
 	// add product
 	@PostMapping("/products")
 	public List<Product> addOne(@RequestBody Product product) {
+		for (Product pt : products) {
+			if (pt.getId()==product.getId()) {
+				throw new ProductAlreadyExist("Product is already available with given id "+product.getId());
+			}
+		}
 		products.add(product);
 		return products;
 	}
@@ -79,7 +86,7 @@ public class ProductController {
 				return product;
 			}
 		}
-		return null;
+		throw new ProductNotFound("Product is not found with given id "+product.getId());
 	}
 
 	// delete product
@@ -92,7 +99,7 @@ public class ProductController {
 				return products;
 			}
 		}
-		return null;
+		throw new ProductNotFound("Product is not found with given id "+id);
 	}
 
 	// add default products
