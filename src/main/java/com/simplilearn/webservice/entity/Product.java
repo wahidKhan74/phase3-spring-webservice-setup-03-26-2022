@@ -2,22 +2,43 @@ package com.simplilearn.webservice.entity;
 
 import java.util.Date;
 
-// POJO or Bean or Encapsulated Class
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="ecom_products")
 public class Product {
 
 	// properties
-	private int id;
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Column(name="product_id")
+	private long id;
+	
+	@Column(name="product_name")
 	private String name;
+	
+	@Column(name="product_price")
 	private double price;
+	
+	@Column(name="product_desc")
 	private String description;
+	
+	@Column(name="product_enable")
 	private boolean enabled;
+	
+	@Column(name="product_create_at")
 	private Date createAt;
 	
 	// get & set methods
-	public int getId() {
+	public long getId() {
 		return id;
 	}
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 	public String getName() {

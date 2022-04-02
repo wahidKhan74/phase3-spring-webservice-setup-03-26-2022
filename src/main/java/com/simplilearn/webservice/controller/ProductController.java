@@ -1,9 +1,9 @@
 package com.simplilearn.webservice.controller;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,100 +16,95 @@ import org.springframework.web.bind.annotation.RestController;
 import com.simplilearn.webservice.entity.Product;
 import com.simplilearn.webservice.exception.ProductAlreadyExist;
 import com.simplilearn.webservice.exception.ProductNotFound;
+import com.simplilearn.webservice.repository.ProductRepository;
 
 @RestController
 public class ProductController {
 
-	List<Product> products = new ArrayList<>();
+	@Autowired
+	ProductRepository productRepository;
 
 	// get one product by id
 	@GetMapping("/product/{id}")
-	public Product getOne(@PathVariable(value = "id") int id) {
-		for (Product product : products) {
-			if (product.getId() == id) {
-				return product;
-			}
+	public Product getOne(@PathVariable(value = "id") long id) {
+		Optional<Product> data = productRepository.findById(id);
+		if (!data.isPresent()) {
+			throw new ProductNotFound("Product is not found with given id " + id);
 		}
-		throw new ProductNotFound("Product is not found with given id "+id);
+		return data.get();
 	}
 
 	// get one product by name
 	@GetMapping("/product")
-	public Product getOne(@RequestParam(value = "name") String name) {
-		for (Product product : products) {
-			if (product.getName().equals(name)) {
-				return product;
-			}
+	public List<Product> getOne(@RequestParam(value = "name") String name) {
+		List<Product> productList = productRepository.findByName(name);
+		if (productList.isEmpty()) {
+			throw new ProductNotFound("Product is not found with given name " + name);
 		}
-		throw new ProductNotFound("Product is not found with given name "+name);
+		return productList;
+	}
+
+	// get one product by enabled flag (active or inactive product)
+	@GetMapping("/product/status")
+	public List<Product> getOne(@RequestParam(value = "enabled") boolean enabled) {
+		List<Product> productList = productRepository.findByEnabled(enabled);
+		if (productList.isEmpty()) {
+			throw new ProductNotFound("Product is not found with given status " + enabled);
+		}
+		return productList;
 	}
 
 	// get one product by name
 	@GetMapping("/product/search")
-	public Product searchOne(@RequestParam(value = "name") String name) {
-		for (Product product : products) {
-			if (product.getName().contains(name)) {
-				return product;
-			}
+	public List<Product> searchOne(@RequestParam(value = "name") String name) {
+		List<Product> productList = productRepository.searchByName(name);
+		if (productList.isEmpty()) {
+			throw new ProductNotFound("Product is not found with given name " + name);
 		}
-		throw new ProductNotFound("Product is not found with given name "+name);
+		return productList;
 	}
 
 	// get all products
 	@GetMapping("/products")
 	public List<Product> getProducts() {
-		if (products.isEmpty()) {
-			addDefaults();
+		List<Product> productList = productRepository.findAll();
+		if (productList.isEmpty()) {
+			throw new ProductNotFound("Empty product list, zero products found");
 		}
-		return products;
+		return productList;
 	}
 
 	// add product
 	@PostMapping("/products")
-	public List<Product> addOne(@RequestBody Product product) {
-		for (Product pt : products) {
-			if (pt.getId()==product.getId()) {
-				throw new ProductAlreadyExist("Product is already available with given id "+product.getId());
+	public Product addOne(@RequestBody Product product) {
+		List<Product> productList = productRepository.findAll();
+		for (Product pt : productList) {
+			if (pt.getId() == product.getId()) {
+				throw new ProductAlreadyExist("Product is already available with given id " + product.getId());
 			}
 		}
-		products.add(product);
-		return products;
+		return productRepository.save(product);
 	}
 
 	// update product
 	@PutMapping("/products")
 	public Product updateOne(@RequestBody Product product) {
-		for (int index = 0; index < products.size(); index++) {
-			if (product.getId() == products.get(index).getId()) {
-				// set : replace user product
-				products.set(index, product);
-				return product;
-			}
+		Optional<Product> data = productRepository.findById(product.getId());
+		if (!data.isPresent()) {
+			throw new ProductNotFound("Product is not found with given id " + product.getId());
 		}
-		throw new ProductNotFound("Product is not found with given id "+product.getId());
+		return productRepository.save(product);
 	}
 
 	// delete product
 	@DeleteMapping("/products/{id}")
-	public List<Product> deleteOne(@PathVariable(value = "id") int id) {
-		for (int index = 0; index < products.size(); index++) {
-			if (id == products.get(index).getId()) {
-				// set : replace user product
-				products.remove(index);
-				return products;
-			}
+	public String deleteOne(@PathVariable(value = "id") long id) {
+		Optional<Product> data = productRepository.findById(id);
+		if (!data.isPresent()) {
+			throw new ProductNotFound("Product is not found with given id " + id);
 		}
-		throw new ProductNotFound("Product is not found with given id "+id);
+		productRepository.deleteById(id);
+		return "Product is deleted successfully!";
 	}
 
-	// add default products
-	private void addDefaults() {
-		products.add(new Product(10001, "HP 10012RED Model laptop", 993.994, "It is a laptop", true, new Date()));
-		products.add(
-				new Product(10002, "Apple mac book 9345MSLV series", 89993.994, "It is a laptop", true, new Date()));
-		products.add(
-				new Product(10003, "Dell slim book 98456ERSD series", 7723.994, "It is a laptop", false, new Date()));
-		products.add(
-				new Product(10004, "Lenovo slim book QURW954756 model", 3723.994, "It is a laptop", false, new Date()));
-	}
 }
