@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Phase3SpringWebserviceSetup03262022Application {
+public class WebserviceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Phase3SpringWebserviceSetup03262022Application.class, args);
+		SpringApplication.run(WebserviceApplication.class, args);
 	}
 
 }
