@@ -76,8 +76,19 @@ public class Product {
 	public Product() {
 		super();
 	}
+	
 	public Product( String name, double price, String description, boolean enabled, Date createAt) {
 		super();
+		this.name = name;
+		this.price = price;
+		this.description = description;
+		this.enabled = enabled;
+		this.createAt = createAt;
+	}
+	
+	public Product(int id, String name, double price, String description, boolean enabled, Date createAt) {
+		super();
+		this.id = id;
 		this.name = name;
 		this.price = price;
 		this.description = description;
